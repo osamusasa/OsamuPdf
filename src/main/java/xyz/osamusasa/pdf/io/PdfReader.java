@@ -4,6 +4,7 @@ package xyz.osamusasa.pdf.io;
 import xyz.osamusasa.pdf.PdfFile;
 import xyz.osamusasa.pdf.PdfFormatException;
 import xyz.osamusasa.pdf.element.*;
+import xyz.osamusasa.pdf.parser.PdfNamedObjectParser;
 import xyz.osamusasa.pdf.util.ByteArrayUtil;
 
 import java.io.*;
@@ -272,6 +273,7 @@ public class PdfReader {
 
         PdfObject object = null;
 
-        return new PdfNamedObject(objectNumber, generation, object);
+        //return new PdfNamedObject(objectNumber, generation, object);
+        return PdfNamedObjectParser.parse(ary);
     }
 }
