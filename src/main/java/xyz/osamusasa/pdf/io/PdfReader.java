@@ -264,16 +264,6 @@ public class PdfReader {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private static PdfNamedObject byteAry2NamedObject(Byte[] ary) throws PdfFormatException {
-        String[] firstLines = new String(ByteArrayUtil.subAryUntilReturn(ary, 0)).split(" ");
-        if (!(firstLines.length == 3 && "obj".equals(firstLines[2]))) {
-            throw new PdfFormatException("named object needs to start \"obj\" keyword");
-        }
-        int objectNumber = Integer.valueOf(firstLines[0]);
-        int generation = Integer.valueOf(firstLines[1]);
-
-        PdfObject object = null;
-
-        //return new PdfNamedObject(objectNumber, generation, object);
         return PdfNamedObjectParser.parse(ary);
     }
 }
