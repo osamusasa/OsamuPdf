@@ -35,6 +35,7 @@ public class PdfNamedObjectParser {
      * ソースを解析して、インダイレクト・オブジェクトを生成する。
      *
      * @return 解析したインダイレクト・オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfNamedObject parse() throws PdfFormatException {
         String firstLine = new String(ByteArrayUtil.subAryUntilReturn(source, 0));
@@ -57,6 +58,7 @@ public class PdfNamedObjectParser {
      *
      * @param source ソース
      * @return 解析したインダイレクト・オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     public static PdfNamedObject parse(Byte[] source) throws PdfFormatException {
         PdfNamedObjectParser parser = new PdfNamedObjectParser(source);
@@ -67,6 +69,7 @@ public class PdfNamedObjectParser {
      * すべてのオブジェクトへの分岐
      *
      * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s1() throws PdfFormatException {
 //        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
@@ -114,6 +117,7 @@ public class PdfNamedObjectParser {
      * バイナリorディクショナリ
      *
      * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s2() throws PdfFormatException {
 //        System.out.println("s2(" + source[pos] + "," + (char)(byte)source[pos] + ")");
@@ -133,6 +137,7 @@ public class PdfNamedObjectParser {
      * ディクショナリ
      *
      * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s3() throws PdfFormatException {
 //        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
@@ -158,6 +163,7 @@ public class PdfNamedObjectParser {
      * PdfNameが始まる
      *
      * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s4() throws PdfFormatException {
 //        System.out.println("s4(" + source[pos] + "," + (char)(byte)source[pos] + ")");

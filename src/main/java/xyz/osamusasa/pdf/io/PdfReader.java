@@ -5,7 +5,6 @@ import xyz.osamusasa.pdf.PdfFile;
 import xyz.osamusasa.pdf.PdfFormatException;
 import xyz.osamusasa.pdf.element.*;
 import xyz.osamusasa.pdf.parser.PdfNamedObjectParser;
-import xyz.osamusasa.pdf.util.ByteArrayUtil;
 
 import java.io.*;
 import java.util.ArrayList;
