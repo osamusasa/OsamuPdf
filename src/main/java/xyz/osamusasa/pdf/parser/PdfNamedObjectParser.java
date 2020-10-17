@@ -69,6 +69,7 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s1() throws PdfFormatException {
+//        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         switch (source[pos]) {
             case '(': {
 
@@ -78,7 +79,8 @@ public class PdfNamedObjectParser {
                 return s2();
             }
             case '/': {
-
+                pos++;
+                return s5();
             }
             case '[': {
 
@@ -98,6 +100,12 @@ public class PdfNamedObjectParser {
             case '9': {
 
             }
+            case ' ':
+            case '\r':
+            case '\n': {
+                pos++;
+                return s1();
+            }
         }
         return null;
     }
@@ -108,6 +116,7 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s2() throws PdfFormatException {
+//        System.out.println("s2(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         switch (source[pos]) {
             case '<': {
                 pos++;
@@ -126,12 +135,22 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s3() throws PdfFormatException {
+//        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         Map<PdfName, PdfObject> dict = new HashMap<>();
         while (source[pos] != '>') {
             PdfName name = (PdfName) s4();
             PdfObject object = s1();
             dict.put(name, object);
+            skipWhiteSpace();
         }
+
+        pos++;
+        if (source[pos] != '>') {
+            throw new PdfFormatException("dictionaryは\">>\"で終わります。");
+        } else {
+            pos++;
+        }
+
         return new PdfDictionary(dict);
     }
 
@@ -141,7 +160,12 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s4() throws PdfFormatException {
+//        System.out.println("s4(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+
+        skipWhiteSpace();
+
         if (source[pos] == '/') {
+            pos++;
             return s5();
         } else {
             throw new PdfFormatException("PdfNameは/から始まります");
@@ -158,7 +182,7 @@ public class PdfNamedObjectParser {
         while (isNameChar(source[pos])) {
             pos++;
         }
-        return null;
+        return new PdfName(ByteArrayUtil.subString(source, start, pos));
     }
 
 
@@ -172,5 +196,16 @@ public class PdfNamedObjectParser {
      */
     private boolean isNameChar(byte c) {
         return 33 <= c && c <= 126 && c != 47;
+    }
+
+    /**
+     * ホワイトスペースでない文字が出るまでposを進める
+     *
+     * ' '、'\r'、'\n'をスキップする
+     */
+    private void skipWhiteSpace() {
+        while (source[pos] == ' ' || source[pos] == '\r' || source[pos] == '\n') {
+            pos++;
+        }
     }
 }

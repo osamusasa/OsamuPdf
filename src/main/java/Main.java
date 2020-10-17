@@ -10,9 +10,6 @@ public class Main {
     public static void main(String[] args) {
         File f = new File(Main.class.getResource("HelloWorld.pdf").getPath());
 
-        File f1 = new File("C:\\Users\\diamo\\Downloads\\E-bumon-20200214.pdf");
-        File f2 = new File("C:\\Users\\diamo\\Downloads\\B2014_imamura.pdf");
-
         try {
             PdfFile pdf = PdfReader.readPdf(f);
 
@@ -31,12 +28,12 @@ public class Main {
         StringBuilder sb = new StringBuilder(str.length());
 
         for (char c: str.toCharArray()) {
-            if (c == '{') {
+            if (c == '{' || c == '[') {
                 indentCnt++;
                 sb.append(c);
                 sb.append(retCode);
                 sb.append(indent.repeat(indentCnt));
-            } else if (c == '}') {
+            } else if (c == '}' || c == ']') {
                 indentCnt--;
                 sb.append(retCode);
                 sb.append(indent.repeat(indentCnt));
