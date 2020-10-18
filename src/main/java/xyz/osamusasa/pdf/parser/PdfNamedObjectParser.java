@@ -1,13 +1,12 @@
 package xyz.osamusasa.pdf.parser;
 
 import xyz.osamusasa.pdf.PdfFormatException;
-import xyz.osamusasa.pdf.element.PdfDictionary;
-import xyz.osamusasa.pdf.element.PdfName;
-import xyz.osamusasa.pdf.element.PdfNamedObject;
-import xyz.osamusasa.pdf.element.PdfObject;
+import xyz.osamusasa.pdf.element.*;
 import xyz.osamusasa.pdf.util.ByteArrayUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PdfNamedObjectParser {
@@ -86,7 +85,7 @@ public class PdfNamedObjectParser {
                 return s5();
             }
             case '[': {
-
+                return s6();
             }
             case 's': {
 
@@ -184,11 +183,52 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s5() {
+        System.out.println("s5(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         int start = pos;
         while (isNameChar(source[pos])) {
             pos++;
         }
         return new PdfName(ByteArrayUtil.subString(source, start, pos));
+    }
+
+    /**
+     * arrayが始まる
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s6() throws PdfFormatException {
+        System.out.println("s6(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        skipWhiteSpace();
+
+        if (source[pos] == '[') {
+            pos++;
+            return s7();
+        } else {
+            throw new PdfFormatException("PdfArrayは[から始まります");
+        }
+    }
+
+    /**
+     * arrayの内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s7() throws PdfFormatException {
+        System.out.println("s7(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        List<PdfObject> list = new ArrayList<>();
+
+        skipWhiteSpace();
+        while (source[pos] != ']') {
+            PdfObject object = s1();
+            list.add(object);
+            skipWhiteSpace();
+        }
+
+        pos++;
+
+        return new PdfArray(list);
     }
 
 

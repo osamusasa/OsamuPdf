@@ -36,7 +36,10 @@ public class PdfReader {
         String version = getVersion();
         PdfTrailer trailer = getTrailer();
         PdfCrossReferenceTable xref = getXref(trailer);
-        PdfBody body = new PdfBody(readObject(xref.getCrossReferences().get(1).getOffset()));
+        PdfBody body = new PdfBody(
+                readObject(xref.getCrossReferences().get(1).getOffset()),
+                readObject(xref.getCrossReferences().get(2).getOffset())
+        );
 
         return new PdfFile(version, body, xref, trailer);
     }
