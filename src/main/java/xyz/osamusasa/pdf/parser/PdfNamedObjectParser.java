@@ -71,7 +71,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s1() throws PdfFormatException {
-//        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         switch (source[pos]) {
             case '(': {
 
@@ -90,6 +90,7 @@ public class PdfNamedObjectParser {
             case 's': {
 
             }
+            case '-':
             case '0':
             case '1':
             case '2':
@@ -100,7 +101,7 @@ public class PdfNamedObjectParser {
             case '7':
             case '8':
             case '9': {
-
+                return s8();
             }
             case ' ':
             case '\r':
@@ -139,7 +140,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s3() throws PdfFormatException {
-//        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         Map<PdfName, PdfObject> dict = new HashMap<>();
         while (source[pos] != '>') {
             PdfName name = (PdfName) s4();
@@ -231,17 +232,116 @@ public class PdfNamedObjectParser {
         return new PdfArray(list);
     }
 
+    /**
+     * PdfNumberが始まる
+     *
+     * インダイレクト・オブジェクトへの参照の可能性もあるので、
+     * ２つ先のオブジェクトまで先読みして、参照でなければposを戻す
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s8() throws PdfFormatException {
+        System.out.println("s8(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        PdfObject o1 = s9();
+
+        skipWhiteSpace();
+
+        if (!isNumberChar(source[pos])) {
+            return o1;
+        }
+
+        int current = pos;
+        PdfObject o2 = s9();
+
+        skipWhiteSpace();
+
+        if (source[pos] == 'R') {
+            pos++;
+            return new PdfReference((PdfInteger) o1, (PdfInteger) o2);
+        }
+
+        pos = current;
+
+        return o1;
+    }
+
+    /**
+     * PdfNumberの内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s9() throws PdfFormatException {
+        System.out.println("s9(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+        int start = pos;
+        boolean isInteger = true;
+
+        while (isNumberChar(source[pos])) {
+            if (isInteger && !isIntegerChar(source[pos])) {
+                isInteger = false;
+            }
+
+            pos++;
+        }
+
+        if (!isWhiteSpaceChar(source[pos])) {
+            throw new PdfFormatException("PdfNumber is consist of [0~9,+,-,.]");
+        }
+
+        if (isInteger) {
+            return new PdfInteger(Integer.valueOf(ByteArrayUtil.subString(source, start, pos)));
+        } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * ホワイトスペースであるか
+     *
+     * ' '、'\r'、'\n'であればtrue
+     *
+     * @param c 文字
+     * @return ホワイトスペースであるか
+     */
+    private static boolean isWhiteSpaceChar(byte c) {
+        return c == ' ' || c == '\r' || c == '\n';
+    }
 
     /**
      * PdfNameを構成する文字であるか。
      *
      * nameは、NULL以外のASCII文字を連続して並べたもの
+     * また、'<'、'['も除く
      *
      * @param c 文字
      * @return PdfNameを構成する文字であるか
      */
     private boolean isNameChar(byte c) {
-        return 33 <= c && c <= 126 && c != 47;
+        return 33 <= c && c <= 126 && c != 47 && c != 60 && c != 91;
+    }
+
+    /**
+     * PdfNumberを構成する文字であるか。
+     *
+     * [0~9,+,-,.]
+     *
+     * @param c 文字
+     * @return PdfNumberを構成する文字であるか。
+     */
+    private static boolean isNumberChar(byte c) {
+        return (48 <= c && c <= 57) || c == 43 || c == 45 || c == 46;
+    }
+
+    /**
+     * PdfIntegerを構成する文字であるか。
+     *
+     * @param c 文字
+     * @return PdfIntegerを構成する文字であるか。
+     */
+    private static boolean isIntegerChar(byte c) {
+        return 48 <= c && c <= 57;
     }
 
     /**

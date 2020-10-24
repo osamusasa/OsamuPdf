@@ -25,10 +25,17 @@ public class Main {
         String retCode = "\n";
         String indent = "    ";
         int indentCnt = 0;
+        boolean paren = false;
         StringBuilder sb = new StringBuilder(str.length());
 
         for (char c: str.toCharArray()) {
-            if (c == '{' || c == '[') {
+            if (paren && c == ')') {
+                paren = false;
+                sb.append(c);
+            } else if (c == '(') {
+                paren = true;
+                sb.append(c);
+            }else if (c == '{' || c == '[') {
                 indentCnt++;
                 sb.append(c);
                 sb.append(retCode);
@@ -37,6 +44,8 @@ public class Main {
                 indentCnt--;
                 sb.append(retCode);
                 sb.append(indent.repeat(indentCnt));
+                sb.append(c);
+            } else if (paren && c == ',') {
                 sb.append(c);
             } else if (c == ',') {
                 sb.append(c);
