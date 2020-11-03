@@ -36,14 +36,7 @@ public class PdfReader {
         String version = getVersion();
         PdfTrailer trailer = getTrailer();
         PdfCrossReferenceTable xref = getXref(trailer);
-        PdfBody body = new PdfBody(
-                readObject(xref.getCrossReferences().get(1).getOffset()),
-                readObject(xref.getCrossReferences().get(2).getOffset()),
-                readObject(xref.getCrossReferences().get(3).getOffset()),
-                readObject(xref.getCrossReferences().get(4).getOffset()),
-                readObject(xref.getCrossReferences().get(5).getOffset()),
-                readObject(xref.getCrossReferences().get(6).getOffset())
-        );
+        PdfBody body = new PdfBody(getObject(xref));
 
         return new PdfFile(version, body, xref, trailer);
     }
@@ -72,6 +65,23 @@ public class PdfReader {
         line = line.replaceFirst("^PDF-", "");
 
         return line;
+    }
+
+    /**
+     * クロスリファレンステーブルを用いて、すべてのオブジェクトを読み込む
+     *
+     * @param xref PDFのクロスリファレンステーブルを表すオブジェクト
+     * @return PDFのすべてのオブジェクトの配列
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfNamedObject[] getObject(PdfCrossReferenceTable xref) throws IOException, PdfFormatException {
+        List<PdfNamedObject> list = new ArrayList<>();
+
+        for (PdfCrossReferenceTableRow rows: xref.getRowsInUse()) {
+            list.add(readObject(rows.getOffset()));
+        }
+
+        return list.toArray(new PdfNamedObject[0]);
     }
 
     /**
