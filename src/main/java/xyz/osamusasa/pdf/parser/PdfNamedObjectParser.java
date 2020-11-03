@@ -71,7 +71,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s1() throws PdfFormatException {
-        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         switch (source[pos]) {
             case '(': {
                 return s11();
@@ -140,7 +140,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s3() throws PdfFormatException {
-        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         Map<PdfName, PdfObject> dict = new HashMap<>();
         while (source[pos] != '>') {
             PdfName name = (PdfName) s4();
@@ -190,7 +190,7 @@ public class PdfNamedObjectParser {
      * @return オブジェクト
      */
     private PdfObject s5() {
-        System.out.println("s5(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s5(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         int start = pos;
         while (isNameChar(source[pos])) {
             pos++;
@@ -205,7 +205,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s6() throws PdfFormatException {
-        System.out.println("s6(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s6(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         skipWhiteSpace();
 
         if (source[pos] == '[') {
@@ -223,7 +223,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s7() throws PdfFormatException {
-        System.out.println("s7(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s7(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         List<PdfObject> list = new ArrayList<>();
 
         skipWhiteSpace();
@@ -248,7 +248,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s8() throws PdfFormatException {
-        System.out.println("s8(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s8(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         PdfObject o1 = s9();
 
         skipWhiteSpace();
@@ -279,7 +279,7 @@ public class PdfNamedObjectParser {
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
      */
     private PdfObject s9() throws PdfFormatException {
-        System.out.println("s9(" + source[pos] + "," + (char)(byte)source[pos] + ")");
+//        System.out.println("s9(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         int start = pos;
         boolean isInteger = true;
 
