@@ -74,7 +74,7 @@ public class PdfNamedObjectParser {
         System.out.println("s1(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         switch (source[pos]) {
             case '(': {
-
+                return s11();
             }
             case '<': {
                 pos++;
@@ -333,6 +333,50 @@ public class PdfNamedObjectParser {
 
         return ary;
     }
+
+    /**
+     * PdfStringが始まる
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s11() throws PdfFormatException {
+        skipWhiteSpace();
+
+        if (source[pos] != '(') {
+            throw new PdfFormatException("stringは(で始まります。");
+        }
+
+        pos++;
+        return s12();
+    }
+
+    /**
+     * PdfStringの内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s12() throws PdfFormatException {
+        int start = pos;
+
+        while (true) {
+            if ( !(pos < source.length) ) {
+                throw new PdfFormatException(")が見つかりません");
+            }
+
+            if (source[pos] == ')') {
+                pos++;
+                break;
+            }
+
+            pos++;
+        }
+
+        return new PdfString(ByteArrayUtil.subString(source, start, pos));
+    }
+
+
 
     /**
      * ホワイトスペースであるか

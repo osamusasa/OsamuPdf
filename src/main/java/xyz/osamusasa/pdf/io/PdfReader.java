@@ -39,7 +39,10 @@ public class PdfReader {
         PdfBody body = new PdfBody(
                 readObject(xref.getCrossReferences().get(1).getOffset()),
                 readObject(xref.getCrossReferences().get(2).getOffset()),
-                readObject(xref.getCrossReferences().get(3).getOffset())
+                readObject(xref.getCrossReferences().get(3).getOffset()),
+                readObject(xref.getCrossReferences().get(4).getOffset()),
+                readObject(xref.getCrossReferences().get(5).getOffset()),
+                readObject(xref.getCrossReferences().get(6).getOffset())
         );
 
         return new PdfFile(version, body, xref, trailer);
