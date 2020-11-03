@@ -156,9 +156,9 @@ public class PdfReader {
         trailerIndex += "<<\r\n".length();
         int size = -1;
         long prev = -1;
-        PdfNamedObject root = null;
-        PdfNamedObject encrypt = null;
-        PdfNamedObject info = null;
+        PdfObject root = null;
+        PdfObject encrypt = null;
+        PdfObject info = null;
         String id = "";
 
         while (!tail.substring(trailerIndex).startsWith(">>")) {
@@ -169,11 +169,11 @@ public class PdfReader {
             } else if (row[0].startsWith("/Prev")) {
 
             } else if (row[0].startsWith("/Root")) {
-
+                root = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
             } else if (row[0].startsWith("/Encrypt")) {
 
             } else if (row[0].startsWith("/Info")) {
-
+                info = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
             } else if (row[0].startsWith("/ID")) {
                 id = row[1];
             }
