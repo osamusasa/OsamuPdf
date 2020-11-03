@@ -114,7 +114,7 @@ public class PdfNamedObjectParser {
     }
 
     /**
-     * バイナリorディクショナリ
+     * バイナリorディクショナリorストリーム
      *
      * @return オブジェクト
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
@@ -134,7 +134,7 @@ public class PdfNamedObjectParser {
     }
 
     /**
-     * ディクショナリ
+     * ディクショナリorストリーム
      *
      * @return オブジェクト
      * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
@@ -156,7 +156,13 @@ public class PdfNamedObjectParser {
             pos++;
         }
 
-        return new PdfDictionary(dict);
+        skipWhiteSpace();
+
+        if (match("stream")) {
+            return new PdfStream(new PdfDictionary(dict), s10());
+        } else {
+            return new PdfDictionary(dict);
+        }
     }
 
     /**
@@ -296,6 +302,37 @@ public class PdfNamedObjectParser {
         }
     }
 
+    /**
+     * ストリームオブジェクトのバイト列
+     *
+     * @return バイト列
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private byte[] s10() throws PdfFormatException {
+        pos += "stream".length();
+        skipWhiteSpace(); //TODO 改行を一つスキップする
+
+        int start = pos;
+
+        while (true) {
+            if (!(pos < source.length)) {
+                throw new PdfFormatException("endstreamがありません");
+            } else if (source[pos] != 'e') {
+                pos++;
+            } else if (match("endstream")) {
+                break;
+            } else {
+                pos++;
+            }
+        }
+
+        byte[] ary = new byte[ pos - start ];
+        for (int i = start, j = 0; i < pos; i++, j++) {
+            ary[j] = source[i];
+        }
+
+        return ary;
+    }
 
     /**
      * ホワイトスペースであるか
@@ -353,5 +390,21 @@ public class PdfNamedObjectParser {
         while (source[pos] == ' ' || source[pos] == '\r' || source[pos] == '\n') {
             pos++;
         }
+    }
+
+    /**
+     * 現在の位置から指定された文字が続くか
+     *
+     * @param sequence 文字列
+     * @return 現在の位置から指定された文字列が続くか
+     */
+    private boolean match(String sequence) {
+        for (int i = pos, j = 0; i < source.length && j < sequence.length(); i++, j++) {
+            if ( (char)(byte)source[i] != sequence.charAt(j) ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

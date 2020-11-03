@@ -26,6 +26,7 @@ public class Main {
         String indent = "    ";
         int indentCnt = 0;
         boolean paren = false;
+        int byteStream = 0;
         StringBuilder sb = new StringBuilder(str.length());
 
         for (char c: str.toCharArray()) {
@@ -35,7 +36,14 @@ public class Main {
             } else if (c == '(') {
                 paren = true;
                 sb.append(c);
-            }else if (c == '{' || c == '[') {
+            } else if(byteStream == 5 && c == '[') {
+                paren = true;
+                byteStream = 0;
+                sb.append(c);
+            } else if(paren && c == ']') {
+                paren = false;
+                sb.append(c);
+            } else if (c == '{' || c == '[') {
                 indentCnt++;
                 sb.append(c);
                 sb.append(retCode);
@@ -51,9 +59,37 @@ public class Main {
                 sb.append(c);
                 sb.append(retCode);
                 sb.append(indent.repeat(indentCnt));
+            } else if(c == 'b') {
+                byteStream++;
+                sb.append(c);
+            } else if(byteStream == 1 && c == 'y') {
+                byteStream++;
+                sb.append(c);
+            } else if(byteStream == 2 && c == 't') {
+                byteStream++;
+                sb.append(c);
+            } else if(byteStream == 3 && c == 'e') {
+                byteStream++;
+                sb.append(c);
+            } else if(byteStream == 4 && c == 's') {
+                byteStream++;
+                sb.append(c);
+            } else if(byteStream == 5 && c == '=') {
+                sb.append(c);
+            } else if(c == ' ') {
+
+            } else if(c == ' ') {
+
+            } else if(c == ' ') {
+
+            } else if(c == ' ') {
+
+            } else if(c == ' ') {
+
             } else if(c == ' ') {
 
             } else {
+                byteStream = 0;
                 sb.append(c);
             }
         }
