@@ -8,10 +8,28 @@ import java.util.NoSuchElementException;
  * PDFファイルのクロスリファレンステーブル部を表すクラス
  */
 public class PdfCrossReferenceTable {
+    /**
+     * サブセクションに含まれている最初のオブジェクト番号
+     */
     private int start;
+
+    /**
+     * オブジェクトの数量
+     */
     private int len;
+
+    /**
+     * クロスリファレンス行
+     */
     private List<PdfCrossReferenceTableRow> crossReferences;
 
+    /**
+     * コンストラクタ
+     *
+     * @param start サブセクションに含まれている最初のオブジェクト番号
+     * @param len オブジェクトの数量
+     * @param crossReferences クロスリファレンス行
+     */
     public PdfCrossReferenceTable(int start, int len, List<PdfCrossReferenceTableRow> crossReferences) {
         this.start = start;
         this.len = len;
@@ -30,13 +48,13 @@ public class PdfCrossReferenceTable {
         return crossReferences;
     }
 
+    /**
+     * 使用中であるクロスリファレンスの行を返すイテレーションを返す
+     *
+     * @return イテレーション
+     */
     public Iterable<PdfCrossReferenceTableRow> getRowsInUse() {
-        return new Iterable<PdfCrossReferenceTableRow>() {
-            @Override
-            public Iterator<PdfCrossReferenceTableRow> iterator() {
-                return new CrossReferenceTableIterator();
-            }
-        };
+        return CrossReferenceTableIterator::new;
     }
 
     @Override
@@ -48,6 +66,9 @@ public class PdfCrossReferenceTable {
                 '}';
     }
 
+    /**
+     * 使用中であるクロスリファレンスの行を返すイテレーション
+     */
     class CrossReferenceTableIterator implements Iterator<PdfCrossReferenceTableRow> {
         int pos;
 
