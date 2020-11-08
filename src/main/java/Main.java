@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import static xyz.osamusasa.pdf.view.PdfViewer.getPdfViewFrame;
+
 public class Main {
     public static void main(String[] args) {
         File f = new File(Main.class.getResource("HelloWorld.pdf").getPath());
@@ -14,6 +16,8 @@ public class Main {
             PdfFile pdf = PdfReader.readPdf(f);
 
             System.out.println(indent(pdf.toString()));
+
+            getPdfViewFrame(pdf).setVisible(true);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException | PdfFormatException e) {
