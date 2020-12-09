@@ -1,4 +1,4 @@
-package xyz.osamusasa.pdf.element;
+package xyz.osamusasa.pdf.element.primitive;
 
 /**
  * PDF文書のnumberを表すクラス

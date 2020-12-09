@@ -1,4 +1,4 @@
-package xyz.osamusasa.pdf.element;
+package xyz.osamusasa.pdf.element.primitive;
 
 import java.util.Objects;
 
@@ -33,6 +33,14 @@ public class PdfReference extends PdfObject {
     public PdfReference(PdfInteger objectNumber, PdfInteger generation) {
         this.objectNumber = objectNumber.getValue();
         this.generation = generation.getValue();
+    }
+
+    public int getObjectNumber() {
+        return objectNumber;
+    }
+
+    public int getGeneration() {
+        return generation;
     }
 
     @Override

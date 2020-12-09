@@ -3,7 +3,7 @@ package xyz.osamusasa.pdf.io;
 
 import xyz.osamusasa.pdf.PdfFile;
 import xyz.osamusasa.pdf.PdfFormatException;
-import xyz.osamusasa.pdf.element.*;
+import xyz.osamusasa.pdf.element.primitive.*;
 import xyz.osamusasa.pdf.parser.PdfNamedObjectParser;
 
 import java.io.*;

@@ -1,7 +1,7 @@
 package xyz.osamusasa.pdf.parser;
 
 import xyz.osamusasa.pdf.PdfFormatException;
-import xyz.osamusasa.pdf.element.*;
+import xyz.osamusasa.pdf.element.primitive.*;
 import xyz.osamusasa.pdf.util.ByteArrayUtil;
 
 import java.util.ArrayList;

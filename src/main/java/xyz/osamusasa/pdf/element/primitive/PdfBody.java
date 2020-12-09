@@ -1,4 +1,4 @@
-package xyz.osamusasa.pdf.element;
+package xyz.osamusasa.pdf.element.primitive;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +46,18 @@ public class PdfBody {
         } else {
             return objects.get(index);
         }
+    }
+
+    /**
+     * オブジェクト番号と世代番号で定まる一つのインダイレクト・オブジェクトを返す
+     *
+     * 存在しなかったときは、nullを返す
+     *
+     * @param reference 参照オブジェクト
+     * @return 特定のインダイレクト・オブジェクト
+     */
+    public PdfNamedObject getObject(PdfReference reference) {
+        return getObject(reference.getObjectNumber(), reference.getGeneration());
     }
 
     @Override

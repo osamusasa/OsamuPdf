@@ -1,6 +1,6 @@
 package xyz.osamusasa.pdf.parser;
 
-import xyz.osamusasa.pdf.element.PdfStream;
+import xyz.osamusasa.pdf.element.primitive.PdfStream;
 
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;

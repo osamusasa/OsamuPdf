@@ -1,8 +1,6 @@
 package xyz.osamusasa.pdf;
 
-import xyz.osamusasa.pdf.element.PdfBody;
-import xyz.osamusasa.pdf.element.PdfCrossReferenceTable;
-import xyz.osamusasa.pdf.element.PdfTrailer;
+import xyz.osamusasa.pdf.element.primitive.*;
 
 /**
  * PDfファイルのデータオブジェクト

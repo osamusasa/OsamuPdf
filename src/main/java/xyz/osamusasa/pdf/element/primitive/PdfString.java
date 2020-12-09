@@ -1,4 +1,4 @@
-package xyz.osamusasa.pdf.element;
+package xyz.osamusasa.pdf.element.primitive;
 
 import java.util.Objects;
 

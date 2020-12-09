@@ -1,4 +1,4 @@
-package xyz.osamusasa.pdf.element;
+package xyz.osamusasa.pdf.element.primitive;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +46,26 @@ public class PdfDictionary extends PdfObject {
             }
             dict.put((PdfName)objects[i], objects[i+1]);
         }
+    }
+
+    /**
+     * keyと関連付けられたPdfObjectを返す
+     *
+     * @param key キー
+     * @return PdfObject
+     */
+    public PdfObject get(PdfName key) {
+        return dict.get(key);
+    }
+
+    /**
+     * keyと関連付けられたPdfObjectを返す
+     *
+     * @param key キー
+     * @return PdfObject
+     */
+    public PdfObject get(String key) {
+        return get(new PdfName(key));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package xyz.osamusasa.pdf.view;
 
 import xyz.osamusasa.pdf.PdfFile;
-import xyz.osamusasa.pdf.element.PdfStream;
+import xyz.osamusasa.pdf.element.primitive.PdfStream;
 import xyz.osamusasa.pdf.element.graphics.PageContent;
 import xyz.osamusasa.pdf.element.graphics.PdfText;
 import xyz.osamusasa.pdf.parser.GraphicsParser;
