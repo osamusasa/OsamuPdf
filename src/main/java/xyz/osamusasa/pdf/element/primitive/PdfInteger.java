@@ -28,6 +28,11 @@ public class PdfInteger extends PdfNumber {
     }
 
     @Override
+    public int getInt() throws PdfPrimitiveTypeException {
+        return getValue();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

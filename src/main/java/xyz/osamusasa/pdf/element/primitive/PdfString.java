@@ -24,6 +24,15 @@ public class PdfString extends PdfObject {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String getString() throws PdfPrimitiveTypeException {
+        return value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

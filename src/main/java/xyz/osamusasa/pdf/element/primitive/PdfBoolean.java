@@ -23,6 +23,11 @@ public class PdfBoolean extends PdfNamedObject {
     }
 
     @Override
+    public boolean getBoolean() throws PdfPrimitiveTypeException {
+        return value;
+    }
+
+    @Override
     public String toString() {
         return "PdfBoolean{" +
                 "value=" + value +
