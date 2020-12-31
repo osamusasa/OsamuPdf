@@ -10,8 +10,17 @@ import xyz.osamusasa.pdf.parser.StreamDecoder;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * PDF表示用クラス
+ */
 public class PdfViewer {
 
+    /**
+     * PDFファイルを表示するウィンドウを取得する
+     *
+     * @param pdf PDFファイル
+     * @return PDFファイルを表示するウィンドウ
+     */
     public static Frame getPdfViewFrame(PdfFile pdf) {
         JFrame frame = new JFrame("pdf viewer"); //TODO ファイル名が欲しい
         JPanel pan = new JPanel();
@@ -39,6 +48,8 @@ public class PdfViewer {
                 }
             }
         };
+
+        pdf.getPageSize(0);
 
         canvas.setBounds(0, 0, 1000, 700);
 
