@@ -60,6 +60,11 @@ public class PdfBody {
         return getObject(reference.getObjectNumber(), reference.getGeneration());
     }
 
+    @Deprecated
+    public List<PdfNamedObject> getObjects() {
+        return objects;
+    }
+
     @Override
     public String toString() {
         return "PdfBody{" +
