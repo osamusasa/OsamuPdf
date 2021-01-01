@@ -1,6 +1,7 @@
 package xyz.osamusasa.pdf;
 
 import xyz.osamusasa.pdf.element.document.DocumentTree;
+import xyz.osamusasa.pdf.element.document.Page;
 import xyz.osamusasa.pdf.element.primitive.*;
 import xyz.osamusasa.pdf.parser.DocumentTreeDecoder;
 
@@ -70,9 +71,11 @@ public class PdfFile {
         PdfReference root = (PdfReference) trailer.getkRoot();
         PdfNamedObject catalog = body.getObject(root);
         PdfReference pageRef = (PdfReference) ((PdfDictionary)catalog.getValue()).get("Pages");
-        System.out.println(pageRef);
+        System.out.println("getPage");
+        Page page = tree.getPage(pos);
+        System.out.println(page);
 
-        return null;
+        return page.getMediaBox();
     }
 
     @Override

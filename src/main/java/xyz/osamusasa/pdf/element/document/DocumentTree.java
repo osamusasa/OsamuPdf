@@ -59,6 +59,10 @@ public class DocumentTree {
         this.pageList = pageList;
     }
 
+    public Page getPage(int pos) {
+        return (Page) pageList.get(pos);
+    }
+
     @Override
     public String toString() {
         return "DocumentTree{" +

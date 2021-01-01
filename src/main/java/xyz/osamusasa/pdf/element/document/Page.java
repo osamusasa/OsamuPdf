@@ -95,6 +95,10 @@ public class Page extends Node {
         return contents;
     }
 
+    public Rectangle getMediaBox() {
+        return mediaBox;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

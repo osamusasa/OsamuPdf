@@ -11,6 +11,7 @@ import static xyz.osamusasa.pdf.view.PdfViewer.getPdfViewFrame;
 public class Main {
     public static void main(String[] args) {
         File f = new File(Main.class.getResource("HelloWorld.pdf").getPath());
+        long start = System.currentTimeMillis();
 
         try {
             PdfFile pdf = PdfReader.readPdf(f);
@@ -23,6 +24,8 @@ public class Main {
         } catch (IOException | PdfFormatException e) {
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        System.out.println("処理時間：" + (end - start)  + "ms");
     }
 
     private static String indent(String str) {

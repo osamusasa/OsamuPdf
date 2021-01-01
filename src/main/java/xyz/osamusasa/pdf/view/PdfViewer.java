@@ -35,28 +35,30 @@ public class PdfViewer {
 //        ET
         java.util.List<PageContent> list = GraphicsParser.parse(decode);
         System.out.println(list);
+
+        Rectangle box = pdf.getPageSize(0);
+
         Canvas canvas = new Canvas(){
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
 
                 g.setColor(Color.RED);
+                g.drawRect(box.x, box.y, box.width, box.height);
                 for (PageContent pc: list) {
                     int[] ary = ((PdfText)pc).getTextMatrix();
-                    g.setFont(new Font("Arial", Font.PLAIN, 12));
-                    g.drawString(((PdfText) pc).getText(), ary[6], ary[7]);
+                    g.setFont(new Font("Arial", Font.PLAIN, ((PdfText) pc).getSize()));
+                    g.drawString(((PdfText) pc).getText(), ary[6], box.height - ary[7]);
                 }
             }
         };
 
-        pdf.getPageSize(0);
-
-        canvas.setBounds(0, 0, 1000, 700);
+        canvas.setBounds(box);
 
         pan.add(canvas);
         frame.getContentPane().add(pan);
 
-        frame.setBounds(100,100,1000,700);
+        frame.setBounds(100,100,1000,1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         return frame;
     }
