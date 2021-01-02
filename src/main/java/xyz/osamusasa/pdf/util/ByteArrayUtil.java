@@ -13,10 +13,16 @@ public class ByteArrayUtil {
      * @return 部分配列
      */
     public static byte[] subAry(Byte[] bytes, int from, int to) {
-        int len = to - from;
+        int _from = Math.max(from, 0);
+        int _to = Math.min(to, bytes.length);
+
+        int len = _to - _from;
+        if (len < 0) {
+            throw new IllegalArgumentException("from > to");
+        }
         byte[] subAry = new byte[len];
 
-        for (int i = 0, j = from; i < len; i++, j++) {
+        for (int i = 0, j = _from; i < len; i++, j++) {
             subAry[i] = bytes[j];
         }
 
@@ -45,17 +51,18 @@ public class ByteArrayUtil {
      * @return 部分配列
      */
     public static byte[] subAryUntilReturn(Byte[] bytes, int from) {
-        int to = from;
+        int _from = Math.max(from, 0);
+        int to = _from;
         for (;to < bytes.length; to++) {
             if (bytes[to] == '\n' || bytes[to] == '\r') {
                 break;
             }
         }
 
-        if (!(from < to)) {
+        if (!(_from < to)) {
             return new byte[0];
         }
 
-        return subAry(bytes, from, to);
+        return subAry(bytes, _from, to);
     }
 }
