@@ -9,6 +9,7 @@ import xyz.osamusasa.pdf.parser.PdfNamedObjectParser;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToIntBiFunction;
 
 /**
  * PDFファイルを読み込むクラス
@@ -96,26 +97,47 @@ public class PdfReader {
         long xrefStart = trailer.getStartxref();
         int xrefLen = trailer.getkSize();
 
-        int start = -1;
-        int len = -1;
+        int start;
+        int len;
         List<PdfCrossReferenceTableRow> rows = new ArrayList<>(xrefLen);
 
         String content = read(xrefStart, 50);
         if (!content.startsWith("xref")) {
+            System.err.println(content);
             throw new PdfFormatException("xref Error");
         }
 
-        String subSection = content.substring(
-                "xref\r\n".length(),
-                content.indexOf("\r\n", "xref\r\n".length())
-        );
+        ToIntBiFunction<String, String> rtnLen = (value, regex) -> {
+            if (value.contains(regex + "\r\n")) {
+                return "\r\n".length();
+            } else if (value.contains(regex + "\r")){
+                return "\r".length();
+            } else if (value.contains(regex + "\n")){
+                return "\n".length();
+            } else {
+                return -1;
+            }
+        };
+
+        int xrefRtnLen = rtnLen.applyAsInt(content, "xref");
+        if (xrefRtnLen == -1) {
+            System.err.println(content);
+            throw new PdfFormatException("xref Error");
+        }
+
+        String subSection = content.split("\r\n|\r|\n")[1];
         String[] subSections = subSection.split(" ");
+        int subSectionRtnLen = rtnLen.applyAsInt(content, subSection);
+        if (subSectionRtnLen == -1) {
+            System.err.println(content);
+            throw new PdfFormatException("xref Error");
+        }
 
         start = Integer.valueOf(subSections[0]);
         len = Integer.valueOf(subSections[1]);
 
-        long xrefRowPos = xrefStart + "xref\r\n".length() + subSection.length() + "\r\n".length();
-        String[] rowsStr = read(xrefRowPos, 20 * xrefLen).split("\r\n");
+        long xrefRowPos = xrefStart + "xref".length() + xrefRtnLen + subSection.length() + subSectionRtnLen;
+        String[] rowsStr = read(xrefRowPos, 20 * xrefLen).split("\r\n|\r|\n");
 
         for (String r: rowsStr) {
             int offset = Integer.valueOf(r.substring(0, 10));
@@ -139,21 +161,36 @@ public class PdfReader {
         long from = (file.length() - 1) - (long)readNByte + 1;
         String tail = read(from, readNByte);
 
-        if (!tail.endsWith("%%EOF\r\n")) {
+        if (!(tail.endsWith("%%EOF\r\n") || tail.endsWith("%%EOF\n") || tail.endsWith("%%EOF\r"))) {
             System.err.println(tail);
             throw new PdfFormatException("Trailer Error");
         }
 
-        long startxref = Long.valueOf(tail.substring(tail.indexOf("startxref")).split("\r\n")[1]);
+        long startxref = Long.valueOf(tail.substring(tail.indexOf("startxref")).split("\r\n|\r|\n")[1]);
 
-        int trailerIndex = tail.indexOf("trailer");
-        trailerIndex += "trailer\r\n".length();
-
-        if (!tail.substring(trailerIndex).startsWith("<<\r\n")) {
+        int trailerIndex;
+        if ((trailerIndex = tail.indexOf("trailer\r\n")) != -1) {
+            trailerIndex += "trailer\r\n".length();
+        } else if((trailerIndex = tail.indexOf("trailer\r")) != -1) {
+            trailerIndex += "trailer\r".length();
+        } else if ((trailerIndex = tail.indexOf("trailer\n")) != -1) {
+            trailerIndex += "trailer\n".length();
+        } else {
             System.err.println(tail);
             throw new PdfFormatException("Trailer Error");
         }
-        trailerIndex += "<<\r\n".length();
+
+        if (tail.startsWith("<<\r\n", trailerIndex)){
+            trailerIndex += "<<\r\n".length();
+        } else if (tail.startsWith("<<\r", trailerIndex)) {
+            trailerIndex += "<<\r".length();
+        } else if (tail.startsWith("<<\n", trailerIndex)) {
+            trailerIndex += "<<\n".length();
+        } else {
+            System.err.println(tail);
+            throw new PdfFormatException("Trailer Error");
+        }
+
         int size = -1;
         long prev = -1;
         PdfObject root = null;
@@ -162,7 +199,18 @@ public class PdfReader {
         String id = "";
 
         while (!tail.substring(trailerIndex).startsWith(">>")) {
-            String[] row = tail.substring(trailerIndex, tail.indexOf("\r\n", trailerIndex)).split(" ");
+            int nextRtnIdx, rtnLen;
+            if ((nextRtnIdx = tail.indexOf("\r\n", trailerIndex)) != -1) {
+                rtnLen = "\r\n".length();
+            } else if((nextRtnIdx = tail.indexOf("\r", trailerIndex)) != -1) {
+                rtnLen = "\r".length();
+            } else if ((nextRtnIdx = tail.indexOf("\n", trailerIndex)) != -1) {
+                rtnLen = "\n".length();
+            } else {
+                System.err.println(tail);
+                throw new PdfFormatException("Trailer Error");
+            }
+            String[] row = tail.substring(trailerIndex, nextRtnIdx).split(" ");
 
             if (row[0].startsWith("/Size")) {
                 size = Integer.valueOf(row[1]);
@@ -178,7 +226,7 @@ public class PdfReader {
                 id = row[1];
             }
 
-            trailerIndex = tail.indexOf("\r\n", trailerIndex) + "\r\n".length();
+            trailerIndex = nextRtnIdx + rtnLen;
         }
 
         return new PdfTrailer(size, prev, root, encrypt, info, id, startxref);

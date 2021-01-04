@@ -16,12 +16,30 @@ public class PdfString extends PdfObject {
     private String value;
 
     /**
+     * バイナリであるか
+     *  true:   バイナリデータ
+     *  false:  文字列データ
+     */
+    private boolean isBinary;
+
+    /**
      * コンストラクタ
      *
      * @param value value
      */
     public PdfString(String value) {
+        this(value, false);
+    }
+
+    /**
+     * コンストラクタ
+     *
+     * @param value value
+     * @param isBinary バイナリであるか
+     */
+    public PdfString(String value, boolean isBinary) {
         this.value = value;
+        this.isBinary = isBinary;
     }
 
     public String getValue() {

@@ -1,6 +1,6 @@
 package xyz.osamusasa.pdf.element.primitive;
 
-public class PdfBoolean extends PdfNamedObject {
+public class PdfBoolean extends PdfObject {
 
     /**
      * 真偽値
@@ -10,11 +10,9 @@ public class PdfBoolean extends PdfNamedObject {
     /**
      * コンストラクタ
      *
-     * @param objectNumber オブジェクト番号
-     * @param generation   世代番号
+     * @param value value
      */
-    public PdfBoolean(int objectNumber, int generation, boolean value) {
-        super(objectNumber, generation);
+    public PdfBoolean(boolean value) {
         this.value = value;
     }
 

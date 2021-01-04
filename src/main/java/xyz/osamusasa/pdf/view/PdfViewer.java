@@ -43,8 +43,8 @@ public class PdfViewer {
             public void paint(Graphics g) {
                 super.paint(g);
 
-                g.setColor(Color.RED);
-                g.drawRect(box.x, box.y, box.width, box.height);
+                g.setColor(Color.BLACK);
+                g.drawRect(box.x, box.y, box.width-1, box.height-1);
                 for (PageContent pc: list) {
                     int[] ary = ((PdfText)pc).getTextMatrix();
                     g.setFont(new Font("Arial", Font.PLAIN, ((PdfText) pc).getSize()));

@@ -90,6 +90,13 @@ public class PdfNamedObjectParser {
             case 's': {
 
             }
+            case 't':
+            case 'f': {
+                return s13();
+            }
+            case 'n': {
+                return s15();
+            }
             case '-':
             case '0':
             case '1':
@@ -126,11 +133,8 @@ public class PdfNamedObjectParser {
                 pos++;
                 return s3();
             }
-            default: {
-
-            }
         }
-        return null;
+        return s14();
     }
 
     /**
@@ -142,6 +146,8 @@ public class PdfNamedObjectParser {
     private PdfObject s3() throws PdfFormatException {
 //        System.out.println("s3(" + source[pos] + "," + (char)(byte)source[pos] + ")");
         Map<PdfName, PdfObject> dict = new HashMap<>();
+
+        skipWhiteSpace();
         while (source[pos] != '>') {
             PdfName name = (PdfName) s4();
             PdfObject object = s1();
@@ -180,6 +186,7 @@ public class PdfNamedObjectParser {
             pos++;
             return s5();
         } else {
+            printErrMsg();
             throw new PdfFormatException("PdfNameは/から始まります");
         }
     }
@@ -229,6 +236,12 @@ public class PdfNamedObjectParser {
         skipWhiteSpace();
         while (source[pos] != ']') {
             PdfObject object = s1();
+
+            if (object == null) {
+                printErrMsg();
+                throw new PdfFormatException("配列の内容がnullです");
+            }
+
             list.add(object);
             skipWhiteSpace();
         }
@@ -291,14 +304,21 @@ public class PdfNamedObjectParser {
             pos++;
         }
 
-        if (!isWhiteSpaceChar(source[pos])) {
+        if (!(isWhiteSpaceChar(source[pos]) || source[pos] != ']' || source[pos] != '>') || start == pos) {
+            printErrMsg();
             throw new PdfFormatException("PdfNumber is consist of [0~9,+,-,.]");
         }
 
-        if (isInteger) {
-            return new PdfInteger(Integer.valueOf(ByteArrayUtil.subString(source, start, pos)));
-        } else {
-            return null;
+        try {
+            if (isInteger) {
+                return new PdfInteger(Integer.valueOf(ByteArrayUtil.subString(source, start, pos)));
+            } else {
+                return new PdfReal(Double.valueOf(ByteArrayUtil.subString(source, start, pos)));
+            }
+        } catch (NumberFormatException e) {
+            printErrMsg();
+            e.printStackTrace();
+            throw new PdfFormatException("PdfNumberではありません");
         }
     }
 
@@ -359,10 +379,24 @@ public class PdfNamedObjectParser {
      */
     private PdfObject s12() throws PdfFormatException {
         int start = pos;
+        boolean isEscaped = false;
 
         while (true) {
             if ( !(pos < source.length) ) {
+                printErrMsg();
                 throw new PdfFormatException(")が見つかりません");
+            }
+
+            if (isEscaped) {
+                pos++;
+                isEscaped = false;
+                continue;
+            }
+
+            if (source[pos] == '\\') {
+                isEscaped = true;
+                pos++;
+                continue;
             }
 
             if (source[pos] == ')') {
@@ -373,9 +407,80 @@ public class PdfNamedObjectParser {
             pos++;
         }
 
-        return new PdfString(ByteArrayUtil.subString(source, start, pos));
+        String value = ByteArrayUtil.subString(source, start, pos);
+        value = value
+                .replace("\\(", "(")
+                .replace("\\)", ")")
+                .replace("\\n", "\n");
+
+        return new PdfString(value);
     }
 
+    /**
+     * PdfBooleanの内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s13() throws PdfFormatException {
+        if ("true".equals(ByteArrayUtil.subString(source, pos, pos+"true".length()))) {
+            pos += "true".length();
+            return new PdfBoolean(true);
+        }
+        if ("false".equals(ByteArrayUtil.subString(source, pos, pos+"false".length()))) {
+            pos += "false".length();
+            return new PdfBoolean(false);
+        }
+
+        printErrMsg();
+        throw new PdfFormatException("booleanではありません");
+    }
+
+    /**
+     * PdfString(バイナリデータ)の内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s14() throws PdfFormatException {
+        int start = pos;
+
+        while (true) {
+            if ( !(pos < source.length) ) {
+                printErrMsg();
+                throw new PdfFormatException(">が見つかりません");
+            }
+
+            if (source[pos] == '>') {
+                pos++;
+                break;
+            }
+
+            pos++;
+        }
+
+//        System.err.println("<<" + source[pos] + ">>---------------------------------------------------------------");
+//        printErrMsg();
+//        System.err.println("[" + ByteArrayUtil.subString(source, start, pos-1)+"]");
+
+        return new PdfString(ByteArrayUtil.subString(source, start, pos-1), true);
+    }
+
+    /**
+     * PdfNullの内容
+     *
+     * @return オブジェクト
+     * @throws PdfFormatException PDFファイルとして読み込めなかった場合。
+     */
+    private PdfObject s15() throws PdfFormatException {
+        if ("null".equals(ByteArrayUtil.subString(source, pos, pos+"null".length()))) {
+            pos += "null".length();
+            return new PdfNull();
+        }
+
+        printErrMsg();
+        throw new PdfFormatException("nullではありません");
+    }
 
 
     /**
@@ -400,7 +505,8 @@ public class PdfNamedObjectParser {
      * @return PdfNameを構成する文字であるか
      */
     private boolean isNameChar(byte c) {
-        return 33 <= c && c <= 126 && c != 47 && c != 60 && c != 91;
+        //                                '/'        '<'        '>'        '['        ']'
+        return 33 <= c && c <= 126 && c != 47 && c != 60 && c != 62 && c != 91 && c != 93;
     }
 
     /**
@@ -450,5 +556,68 @@ public class PdfNamedObjectParser {
         }
 
         return true;
+    }
+
+    /**
+     * 現在のsourceとposからエラーメッセージを作成する
+     *
+     * posの前後100文字に加え、posの位置を示す"^"を挿入する。
+     *
+     * @return エラーメッセージ
+     */
+    private String makeErrMsg() {
+        int range = 100;
+        int from = pos - range;
+        int to = pos + range;
+        int subject = range;
+        if (from < 0) {
+            subject += from + 1;
+            from = 0;
+        }
+        if (to > source.length) {
+            subject += source.length - to + 1;
+            to = source.length;
+        }
+
+        String errMsg = ByteArrayUtil.subString(source, from, to);
+
+        int idx;
+        if ((idx = errMsg.indexOf("\r\n", subject)) != -1) {
+            idx += "\r\n".length();
+        } else if ((idx = errMsg.indexOf("\r", subject)) != -1) {
+            idx += "\r".length();
+        } else if ((idx = errMsg.indexOf("\n", subject)) != -1) {
+            idx += "\n".length();
+        } else {
+            idx = errMsg.length();
+        }
+        int lineEnd = idx;
+
+        if ((idx = errMsg.lastIndexOf("\r\n", subject-1)) != -1) {
+            idx += "\r\n".length();
+        } else if ((idx = errMsg.lastIndexOf("\r", subject-1)) != -1) {
+            idx += "\r".length();
+        } else if ((idx = errMsg.lastIndexOf("\n", subject-1)) != -1) {
+            idx += "\n".length();
+        } else {
+            idx = errMsg.length();
+        }
+        int lineStart = idx;
+
+        int spaceCnt = Math.max(subject - lineStart, 0);
+
+        return
+                "char: '" + (char)(byte)source[pos] + "'\n"
+                + errMsg.substring(0, lineEnd)
+                + " ".repeat(spaceCnt)
+                + "^\n"
+                + errMsg.substring(lineEnd);
+    }
+
+    /**
+     * 現在のsourceとposからエラーメッセージを作成し、標準エラーに出力する
+     */
+    private void printErrMsg() {
+        System.err.println(makeErrMsg());
     }
 }
