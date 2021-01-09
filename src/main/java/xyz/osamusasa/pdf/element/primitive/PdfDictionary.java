@@ -69,19 +69,21 @@ public class PdfDictionary extends PdfObject {
     }
 
     /**
-     * keyと関連付けられたPdfStringのvalueを返す
+     * keyと関連付けられたPdfStringまたはPdfNameのvalueを返す
      *
-     * keyと関連付けられたPdfStringがない場合はnullを返す
+     * keyと関連付けられたPdfStringまたはPdfNameがない場合はnullを返す
      *
      * @param key キー
      * @return value
      */
     public String getString(String key) {
         PdfObject obj = get(key);
-        if (!(obj instanceof PdfString)) {
-            return null;
+        if (obj instanceof PdfString) {
+            return ((PdfString)obj).getValue();
+        }else if (obj instanceof PdfName) {
+            return ((PdfName)obj).getValue();
         }
-        return ((PdfString)obj).getValue();
+        return null;
     }
 
     /**
