@@ -5,7 +5,9 @@ import xyz.osamusasa.pdf.element.document.*;
 import xyz.osamusasa.pdf.element.primitive.*;
 import xyz.osamusasa.pdf.util.PdfObjectSchema;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 
 /**
  * ドキュメントツリーのデコーダ
@@ -58,16 +60,30 @@ public class DocumentTreeDecoder {
         PageList pageList = new PageList((PdfDictionary) body.getObject(docCatalog.getPages()).getValue());
         docCatalog.addChild(pageList);
 
-        for(PdfReference reference: pageList.getChildReferences()) {
-            Page page = new Page((PdfDictionary) body.getObject(reference).getValue());
-            pageList.addChild(page);
-            entirePageList.add(page);
+        Deque<PageList> pageListDeque = new ArrayDeque<>();
+        pageListDeque.add(pageList);
 
-            if (page.getContents() != null) {
-                page.addChild(new PageContent((PdfStream) body.getObject(page.getContents()).getValue()));
-            }
-            if (page.getResource() != null) {
-                page.addChild(new PageResource(page.getResource()));
+        while (!pageListDeque.isEmpty()) {
+            PageList pages = pageListDeque.poll();
+            for(PdfReference reference: pages.getChildReferences()) {
+                PdfDictionary value = (PdfDictionary) body.getObject(reference).getValue();
+
+                if ("Pages".equals(value.getString("Type"))) {
+                    pageListDeque.add(new PageList(value));
+                } else if ("Page".equals(value.getString("Type"))) {
+                    Page page = new Page(value);
+                    pageList.addChild(page);
+                    entirePageList.add(page);
+
+                    if (page.getContents() != null) {
+                        page.addChild(new PageContent((PdfStream) body.getObject(page.getContents()).getValue()));
+                    }
+                    if (page.getResource() != null) {
+                        page.addChild(new PageResource(page.getResource()));
+                    }
+                } else {
+                    throw new PdfFormatException("ページリストまたはページではありません");
+                }
             }
         }
 
