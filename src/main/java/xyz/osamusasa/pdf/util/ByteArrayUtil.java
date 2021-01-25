@@ -65,4 +65,24 @@ public class ByteArrayUtil {
 
         return subAry(bytes, _from, to);
     }
+
+    /**
+     * 引数の16進数の文字列表現をバイト配列にパースする
+     *
+     * @param src 16進数の文字列表現
+     * @return バイト配列
+     */
+    public static byte[] toArray(String src) {
+        if (src.length() % 2 != 0) {
+            //TODO
+            throw new IllegalArgumentException("入力の文字列は偶数でないといけません。（将来的に改善予定）");
+        }
+
+        byte[] ret = new byte[src.length() / 2];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = (byte)(int)Integer.valueOf(src.substring(i*2, (i+1)*2), 16);
+        }
+
+        return ret;
+    }
 }
