@@ -17,22 +17,22 @@ public class PdfTrailer {
     /**
      * カタログ(Catalog)ディクショナリ
      */
-    private Object kRoot;
+    private PdfReference kRoot;
 
     /**
      * 暗号化ディクショナリ
      */
-    private Object kEncrypt;
+    private PdfReference kEncrypt;
 
     /**
      * 文書情報(Document Information)ディクショナリ
      */
-    private Object kInfo;
+    private PdfReference kInfo;
 
     /**
      * ２っのバイトストリング（「<」と「>」で囲まれた）で構成されたファイル識別子
      */
-    private String kID;
+    private PdfArray<PdfString> kID;
 
     /**
      * クロスリファレンスセクションの開始オフセット
@@ -50,7 +50,13 @@ public class PdfTrailer {
      * @param kID ファイル識別子
      * @param startxref xrefの開始オフセット値
      */
-    public PdfTrailer(int kSize, long kPrev, Object kRoot, Object kEncrypt, Object kInfo, String kID, long startxref) {
+    public PdfTrailer(int kSize,
+                      long kPrev,
+                      PdfReference kRoot,
+                      PdfReference kEncrypt,
+                      PdfReference kInfo,
+                      PdfArray<PdfString> kID,
+                      long startxref) {
         this.kSize = kSize;
         this.kPrev = kPrev;
         this.kRoot = kRoot;
@@ -68,20 +74,30 @@ public class PdfTrailer {
         return kPrev;
     }
 
-    public Object getkRoot() {
+    public PdfReference getkRoot() {
         return kRoot;
     }
 
-    public Object getkEncrypt() {
+    public PdfReference getkEncrypt() {
         return kEncrypt;
     }
 
-    public Object getkInfo() {
+    public PdfReference getkInfo() {
         return kInfo;
     }
 
-    public String getkID() {
+    @Deprecated
+    public PdfArray<PdfString> getkID() {
         return kID;
+    }
+
+    /**
+     * PdfTrailerに含まれるファイル識別子を返す。
+     *
+     * @return file identifier
+     */
+    public String getFileIdentifier() {
+        return this.kID.get(0).getValue();
     }
 
     public long getStartxref() {

@@ -193,10 +193,10 @@ public class PdfReader {
 
         int size = -1;
         long prev = -1;
-        PdfObject root = null;
-        PdfObject encrypt = null;
-        PdfObject info = null;
-        String id = "";
+        PdfReference root = null;
+        PdfReference encrypt = null;
+        PdfReference info = null;
+        PdfArray<PdfString> id = new PdfArray<>();
 
         while (!tail.substring(trailerIndex).startsWith(">>")) {
             int nextRtnIdx, rtnLen;
@@ -219,11 +219,38 @@ public class PdfReader {
             } else if (row[0].startsWith("/Root")) {
                 root = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
             } else if (row[0].startsWith("/Encrypt")) {
-
+                encrypt = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
             } else if (row[0].startsWith("/Info")) {
                 info = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
             } else if (row[0].startsWith("/ID")) {
-                id = row[1];
+                // rowの中身は以下のような文字列が格納されているはずである。
+                // ('<','>'に囲まれた文字列はファイルによって異なる)
+                //      row[0] = "/ID"
+                //      row[1] = "[<97F62F67780E6473A487D6B15CC5FE75>"
+                //      row[2] = "<48D37FE6F9706B46A3B2FDE6D5026077>]"
+
+                if (row.length != 3) {
+                    throw new PdfFormatException("Trailer Error : IDの要素の数が不正です。");
+                }
+
+                if (
+                        row[1].charAt(0) == '[' &&
+                        row[1].charAt(1) == '<' &&
+                        row[1].charAt(row[1].length()-1) == '>'
+                ) {
+                    id.add(new PdfString(row[1].substring(2, row[1].length() - 1)));
+                }
+                if (
+                        row[2].charAt(0) == '<' &&
+                        row[2].charAt(row[2].length() - 2) == '>' &&
+                        row[2].charAt(row[2].length() - 1) == ']'
+                ) {
+                    id.add(new PdfString(row[2].substring(1, row[2].length() - 2)));
+                }
+
+                if (id.size() != 2) {
+                    throw new PdfFormatException("Trailer Error : IDの要素の形式が不正です。");
+                }
             }
 
             trailerIndex = nextRtnIdx + rtnLen;
