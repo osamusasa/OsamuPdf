@@ -293,8 +293,18 @@ public class PdfNamedObjectParser {
      */
     private PdfObject s9() throws PdfFormatException {
 //        System.out.println("s9(" + source[pos] + "," + (char)(byte)source[pos] + ")");
-        int start = pos;
         boolean isInteger = true;
+        int sign = 1;
+
+        if (source[pos] == '+') {
+            sign = 1;
+            pos++;
+        } else if (source[pos] == '-') {
+            sign = -1;
+            pos++;
+        }
+
+        int start = pos;
 
         while (isNumberChar(source[pos])) {
             if (isInteger && !isIntegerChar(source[pos])) {
@@ -311,9 +321,9 @@ public class PdfNamedObjectParser {
 
         try {
             if (isInteger) {
-                return new PdfInteger(Integer.valueOf(ByteArrayUtil.subString(source, start, pos)));
+                return new PdfInteger(sign * Integer.valueOf(ByteArrayUtil.subString(source, start, pos)));
             } else {
-                return new PdfReal(Double.valueOf(ByteArrayUtil.subString(source, start, pos)));
+                return new PdfReal(sign * Double.valueOf(ByteArrayUtil.subString(source, start, pos)));
             }
         } catch (NumberFormatException e) {
             printErrMsg();
@@ -523,6 +533,8 @@ public class PdfNamedObjectParser {
 
     /**
      * PdfIntegerを構成する文字であるか。
+     *
+     * [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
      *
      * @param c 文字
      * @return PdfIntegerを構成する文字であるか。
