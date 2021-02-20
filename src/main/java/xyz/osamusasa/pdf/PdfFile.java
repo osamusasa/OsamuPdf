@@ -3,7 +3,10 @@ package xyz.osamusasa.pdf;
 import xyz.osamusasa.pdf.element.document.DocumentTree;
 import xyz.osamusasa.pdf.element.document.Page;
 import xyz.osamusasa.pdf.element.primitive.*;
+import xyz.osamusasa.pdf.encryption.Decrypt;
+import xyz.osamusasa.pdf.encryption.Password;
 import xyz.osamusasa.pdf.parser.DocumentTreeDecoder;
+import xyz.osamusasa.pdf.util.ByteArrayUtil;
 
 import java.awt.*;
 
@@ -38,6 +41,16 @@ public class PdfFile {
     private DocumentTree tree;
 
     /**
+     * Pdfのデータが暗号化してあるか
+     */
+    private boolean isEncrypted;
+
+    /**
+     * Pdfファイルのパスワード
+     */
+    private Password password;
+
+    /**
      * コンストラクタ
      *
      * @param version バージョン
@@ -58,6 +71,27 @@ public class PdfFile {
         this.trailer = trailer;
 
         this.tree = DocumentTreeDecoder.decode(this.body, this.xref, this.trailer);
+
+        isEncrypted = trailer.getkEncrypt() != null;
+        if (isEncrypted) {
+            PdfDictionary encryptDict = (PdfDictionary) body.getObject(trailer.getkEncrypt()).getValue();
+            password = new Password(
+                    ByteArrayUtil.toArray(encryptDict.getString("O")),
+                    ((PdfInteger)encryptDict.get("P")).getValue(),
+                    ByteArrayUtil.toArray(trailer.getFileIdentifier())
+                    );
+            // ここから
+            // パスワードを使って下のgetPageContentを正しく動作するようにする
+        }
+    }
+
+    /**
+     * PDFファイルのページ数を返す
+     *
+     * @return ページ数
+     */
+    public int getPageLength() {
+        return tree.getPageSize();
     }
 
     /**
@@ -71,11 +105,41 @@ public class PdfFile {
         PdfReference root = (PdfReference) trailer.getkRoot();
         PdfNamedObject catalog = body.getObject(root);
         PdfReference pageRef = (PdfReference) ((PdfDictionary)catalog.getValue()).get("Pages");
-        System.out.println("getPage");
+//        System.out.println("getPage");
         Page page = tree.getPage(pos);
-        System.out.println(page);
+//        System.out.println(page);
 
         return page.getMediaBox();
+    }
+
+    /**
+     * 指定されたページのコンテンツを返す
+     *
+     * 暗号化してある場合は、復号したページのコンテンツを返す。
+     *
+     * @param pos ページ
+     * @return ページのコンテンツ
+     */
+    public PdfStream getPageContent(int pos) {
+        Page page = tree.getPage(pos);
+        PdfReference ref = page.getContents();
+        PdfNamedObject namedObject = body.getObject(ref);
+        PdfObject obj = namedObject.getValue();
+        PdfStream retObj = (PdfStream)obj;
+
+        if (isEncrypted) {
+            retObj = new PdfStream(
+                    retObj.getDict(),
+                    Decrypt.decrypt(
+                            retObj.getValue(),
+                            password,
+                            namedObject.getObjectNumber(),
+                            namedObject.getGeneration()
+                    )
+            );
+        }
+
+        return retObj;
     }
 
     @Override

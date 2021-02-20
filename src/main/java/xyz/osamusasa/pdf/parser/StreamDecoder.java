@@ -40,15 +40,16 @@ public class StreamDecoder {
      */
     private static String flateDecode(PdfStream stream) {
         try {
-            Inflater decompresser = new Inflater();
+            Inflater decompresser = new Inflater(true);
             decompresser.setInput(stream.getValue());
-            byte[] result = new byte[100];
+            byte[] result = new byte[stream.getLength()];
+//            System.out.println(decompresser.needsDictionary() + ":" + decompresser.needsInput());
             int resultLength = decompresser.inflate(result);
             decompresser.end();
 
             return new String(result, 0, resultLength);
         } catch (DataFormatException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new IllegalArgumentException("圧縮形式がFlate圧縮でありません");
         }
     }

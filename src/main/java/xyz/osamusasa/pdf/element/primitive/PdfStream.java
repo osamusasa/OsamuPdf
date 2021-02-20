@@ -37,6 +37,20 @@ public class PdfStream extends PdfObject {
         return value;
     }
 
+    public String getFilter() {
+        return dict.getString("Filter");
+    }
+
+    public int getLength() {
+        try {
+            return dict.get("Length").getInt();
+        } catch (PdfPrimitiveTypeException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

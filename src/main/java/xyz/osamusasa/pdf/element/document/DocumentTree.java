@@ -59,6 +59,21 @@ public class DocumentTree {
         this.pageList = pageList;
     }
 
+    /**
+     * 各ページへの参照リストの長さを返す
+     *
+     * @return ページ数
+     */
+    public int getPageSize() {
+        return pageList.size();
+    }
+
+    /**
+     * 指定された位置のPageを返す
+     *
+     * @param pos 位置
+     * @return Page
+     */
     public Page getPage(int pos) {
         return (Page) pageList.get(pos);
     }

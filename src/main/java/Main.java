@@ -19,20 +19,20 @@ public class Main {
             PdfFile pdf = PdfReader.readPdf(f);
 
             File file = null;
-            try {
-                Path tmpPath = Files.createTempFile(Paths.get("/tmp"), "prefix", ".suffix");
-                file = tmpPath.toFile();
-
-                // ファイルに書き込み
-                FileWriter fw = new FileWriter(file, true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                PrintWriter pw = new PrintWriter(bw);
-                pw.write(indent(pdf.toString()));
-                pw.flush();
-                pw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Path tmpPath = Files.createTempFile(Paths.get("/tmp"), "prefix", ".suffix");
+//                file = tmpPath.toFile();
+//
+//                // ファイルに書き込み
+//                FileWriter fw = new FileWriter(file, true);
+//                BufferedWriter bw = new BufferedWriter(fw);
+//                PrintWriter pw = new PrintWriter(bw);
+//                pw.write(indent(pdf.toString()));
+//                pw.flush();
+//                pw.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 //            System.out.println(indent(pdf.toString()));
 
             getPdfViewFrame(pdf).setVisible(true);
