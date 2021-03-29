@@ -1,5 +1,7 @@
 package xyz.osamusasa.pdf.element.primitive;
 
+import java.util.Objects;
+
 /**
  * PDFファイルのトレイラー部を表すクラス
  */
@@ -115,5 +117,18 @@ public class PdfTrailer {
                 ", kID='" + kID + '\'' +
                 ", startxref=" + startxref +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PdfTrailer that = (PdfTrailer) o;
+        return kSize == that.kSize && kPrev == that.kPrev && startxref == that.startxref && Objects.equals(kRoot, that.kRoot) && Objects.equals(kEncrypt, that.kEncrypt) && Objects.equals(kInfo, that.kInfo) && Objects.equals(kID, that.kID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(kSize, kPrev, kRoot, kEncrypt, kInfo, kID, startxref);
     }
 }

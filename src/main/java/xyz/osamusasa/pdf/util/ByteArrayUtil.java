@@ -1,5 +1,7 @@
 package xyz.osamusasa.pdf.util;
 
+import java.util.Arrays;
+
 /**
  * Byte配列に関する操作を簡潔に行うためのユーティリティクラス
  */
@@ -40,6 +42,59 @@ public class ByteArrayUtil {
     public static String subString(Byte[] bytes, int from, int to) {
         return new String(subAry(bytes, from, to));
     }
+
+    /**
+     * 指定された位置から、ホワイトスペースまでの部分配列を返す。
+     *
+     * ホワイトスペースが見つからなかった場合は、終わりまでの配列を返す。
+     * 返す配列に、ホワイトスペースは含まれない。
+     *
+     * @param bytes byte配列
+     * @param from 開始地点
+     * @return 部分配列
+     */
+    public static byte[] subAryUntilWhiteSpace(Byte[] bytes, int from) {
+        int _from = Math.max(from, 0);
+        int to = _from;
+        for (;to < bytes.length; to++) {
+            if (Character.isWhitespace(bytes[to])) {
+                break;
+            }
+        }
+
+        if (!(_from < to)) {
+            return new byte[0];
+        }
+
+        return subAry(bytes, _from, to);
+    }
+
+    /**
+     * 指定された位置から、ホワイトスペースまでの部分配列を返す。
+     *
+     * ホワイトスペースが見つからなかった場合は、終わりまでの配列を返す。
+     * 返す配列に、ホワイトスペースは含まれない。
+     *
+     * @param bytes byte配列
+     * @param from 開始地点
+     * @return 部分配列
+     */
+    public static byte[] subAryUntilWhiteSpace(byte[] bytes, int from) {
+        int _from = Math.max(from, 0);
+        int to = _from;
+        for (;to < bytes.length; to++) {
+            if (Character.isWhitespace(bytes[to])) {
+                break;
+            }
+        }
+
+        if (!(_from < to)) {
+            return new byte[0];
+        }
+
+        return Arrays.copyOfRange(bytes, _from, to);
+    }
+
     /**
      * 指定された位置から、改行コードまでの部分配列を返す。
      *
@@ -84,5 +139,93 @@ public class ByteArrayUtil {
         }
 
         return ret;
+    }
+
+    /**
+     * この文字列が指定されたchar値のシーケンスを含む場合に限りtrueを返します。
+     *
+     * @param src バイト配列
+     * @param s 検索するシーケンス
+     * @return この文字列がsを含む場合はtrue。そうでない場合はfalse
+     */
+    public static boolean contains(byte[] src, CharSequence s) {
+        for (int start = 0; start < src.length; start++) {
+            if (src[start] != s.charAt(0)) {
+                continue;
+            }
+
+            int sameLength = 0;
+
+            for (int i = 0; i < s.length(); i++) {
+                if (src[start + i] == s.charAt(i)) {
+                    sameLength++;
+                } else {
+                    break;
+                }
+            }
+
+            if (sameLength == s.length()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * このバイト配列の指定されたインデックス以降の部分文字列が、指定された接頭辞で始まるかどうかを判定します。
+     *
+     * @param src バイト配列
+     * @param prefix 接頭辞
+     * @param toffset このバイト配列の比較を開始する位置
+     * @return 引数によって表される文字シーケンスが、インデックスtoffsetで始まるこのオブジェクトの部分文字列の接頭辞である場合はtrue、
+     *         そうでない場合はfalse。 toffsetが負の値の場合、あるいはバイト配列の長さより大きい場合、結果はfalse。
+     */
+    public static boolean startsWith(byte[] src, String prefix, int toffset) {
+        if (toffset < 0) {
+            return false;
+        }
+
+        if (src.length < prefix.length() + toffset) {
+            return false;
+        }
+
+
+        int sameResult = 0;
+        for (int j = 0; j < prefix.length(); j++) {
+            if (src[j + toffset] == prefix.charAt(j)) {
+                sameResult++;
+            } else {
+                break;
+            }
+        }
+
+        return sameResult == prefix.length();
+    }
+
+    /**
+     * このバイト配列が、指定された接尾辞で終るかどうかを判定します。
+     *
+     * @param src バイト配列
+     * @param suffix 接尾辞
+     * @return 引数によって表される文字シーケンスが、バイト配列によって表される文字シーケンスの接尾辞である場合はtrue、そうでない場合はfalse。
+     *         引数が空の文字列の場合の結果はtrueになる。
+     */
+    public static boolean endWith(byte[] src, String suffix) {
+        if (suffix.isEmpty()) {
+            return true;
+        }
+
+        if (src.length < suffix.length()) {
+            return false;
+        }
+
+        for (int i = src.length - 1, j = suffix.length() - 1; j >= 0; i--, j--) {
+            if (src[i] != suffix.charAt(j)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -48,4 +48,9 @@ public class PdfReal extends PdfNumber {
     public int hashCode() {
         return Objects.hash(value);
     }
+
+    @Override
+    public int getInt() throws PdfPrimitiveTypeException {
+        return (int) getValue();
+    }
 }

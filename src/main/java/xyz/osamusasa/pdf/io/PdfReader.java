@@ -5,8 +5,10 @@ import xyz.osamusasa.pdf.PdfFile;
 import xyz.osamusasa.pdf.PdfFormatException;
 import xyz.osamusasa.pdf.element.primitive.*;
 import xyz.osamusasa.pdf.parser.PdfNamedObjectParser;
+import xyz.osamusasa.pdf.parser.TrailerParser;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntBiFunction;
@@ -166,97 +168,7 @@ public class PdfReader {
             throw new PdfFormatException("Trailer Error");
         }
 
-        long startxref = Long.valueOf(tail.substring(tail.indexOf("startxref")).split("\r\n|\r|\n")[1]);
-
-        int trailerIndex;
-        if ((trailerIndex = tail.indexOf("trailer\r\n")) != -1) {
-            trailerIndex += "trailer\r\n".length();
-        } else if((trailerIndex = tail.indexOf("trailer\r")) != -1) {
-            trailerIndex += "trailer\r".length();
-        } else if ((trailerIndex = tail.indexOf("trailer\n")) != -1) {
-            trailerIndex += "trailer\n".length();
-        } else {
-            System.err.println(tail);
-            throw new PdfFormatException("Trailer Error");
-        }
-
-        if (tail.startsWith("<<\r\n", trailerIndex)){
-            trailerIndex += "<<\r\n".length();
-        } else if (tail.startsWith("<<\r", trailerIndex)) {
-            trailerIndex += "<<\r".length();
-        } else if (tail.startsWith("<<\n", trailerIndex)) {
-            trailerIndex += "<<\n".length();
-        } else {
-            System.err.println(tail);
-            throw new PdfFormatException("Trailer Error");
-        }
-
-        int size = -1;
-        long prev = -1;
-        PdfReference root = null;
-        PdfReference encrypt = null;
-        PdfReference info = null;
-        PdfArray<PdfString> id = new PdfArray<>();
-
-        while (!tail.substring(trailerIndex).startsWith(">>")) {
-            int nextRtnIdx, rtnLen;
-            if ((nextRtnIdx = tail.indexOf("\r\n", trailerIndex)) != -1) {
-                rtnLen = "\r\n".length();
-            } else if((nextRtnIdx = tail.indexOf("\r", trailerIndex)) != -1) {
-                rtnLen = "\r".length();
-            } else if ((nextRtnIdx = tail.indexOf("\n", trailerIndex)) != -1) {
-                rtnLen = "\n".length();
-            } else {
-                System.err.println(tail);
-                throw new PdfFormatException("Trailer Error");
-            }
-            String[] row = tail.substring(trailerIndex, nextRtnIdx).split(" ");
-
-            if (row[0].startsWith("/Size")) {
-                size = Integer.valueOf(row[1]);
-            } else if (row[0].startsWith("/Prev")) {
-
-            } else if (row[0].startsWith("/Root")) {
-                root = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
-            } else if (row[0].startsWith("/Encrypt")) {
-                encrypt = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
-            } else if (row[0].startsWith("/Info")) {
-                info = new PdfReference(Integer.valueOf(row[1]), Integer.valueOf(row[2]));
-            } else if (row[0].startsWith("/ID")) {
-                // rowの中身は以下のような文字列が格納されているはずである。
-                // ('<','>'に囲まれた文字列はファイルによって異なる)
-                //      row[0] = "/ID"
-                //      row[1] = "[<97F62F67780E6473A487D6B15CC5FE75>"
-                //      row[2] = "<48D37FE6F9706B46A3B2FDE6D5026077>]"
-
-                if (row.length != 3) {
-                    throw new PdfFormatException("Trailer Error : IDの要素の数が不正です。");
-                }
-
-                if (
-                        row[1].charAt(0) == '[' &&
-                        row[1].charAt(1) == '<' &&
-                        row[1].charAt(row[1].length()-1) == '>'
-                ) {
-                    id.add(new PdfString(row[1].substring(2, row[1].length() - 1)));
-                }
-                if (
-                        row[2].charAt(0) == '<' &&
-                        row[2].charAt(row[2].length() - 2) == '>' &&
-                        row[2].charAt(row[2].length() - 1) == ']'
-                ) {
-                    id.add(new PdfString(row[2].substring(1, row[2].length() - 2)));
-                }
-
-                if (id.size() != 2) {
-                    throw new PdfFormatException("Trailer Error : IDの要素の形式が不正です。");
-                }
-            }
-
-            trailerIndex = nextRtnIdx + rtnLen;
-        }
-
-        return new PdfTrailer(size, prev, root, encrypt, info, id, startxref);
+        return TrailerParser.readTrailer(tail);
     }
 
     /**
@@ -333,6 +245,27 @@ public class PdfReader {
         }
 
         return null;
+    }
+
+    /**
+     * 指定された位置から連続するホワイトスペースの文字数を返す。
+     *
+     * startの位置の文字がホワイトスペースでない場合は、0を返す。
+     * ホワイトスペースは' '、'\r'、'\n'である。
+     *
+     * @param start 開始位置
+     * @return 連続する空白相当文字の文字数
+     * @throws IOException 入出力エラーが発生した場合。
+     */
+    private int whiteSpace(long start) throws IOException {
+        int cnt = 0;
+        long oldPos = file.getFilePointer();
+        file.seek(start);
+        while (file.readChar() == ' ' || file.readChar() == '\r' || file.readChar() == '\n') {
+            cnt++;
+        }
+        file.seek(oldPos);
+        return cnt;
     }
 
     /**

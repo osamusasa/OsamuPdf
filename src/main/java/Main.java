@@ -12,27 +12,28 @@ import static xyz.osamusasa.pdf.view.PdfViewer.getPdfViewFrame;
 public class Main {
     public static void main(String[] args) {
 //        File f = new File(Main.class.getResource("HelloWorld.pdf").getPath());
-        File f = new File(Main.class.getResource("pdf_reference_1-7.pdf").getPath());
+//        File f = new File(Main.class.getResource("pdf_reference_1-7.pdf").getPath());
+        File f = new File(Main.class.getResource("test.pdf").getPath());
         long start = System.currentTimeMillis();
 
         try {
             PdfFile pdf = PdfReader.readPdf(f);
 
             File file = null;
-            try {
-                Path tmpPath = Files.createTempFile(Paths.get("/tmp"), "prefix", ".suffix");
-                file = tmpPath.toFile();
-
-                // ファイルに書き込み
-                FileWriter fw = new FileWriter(file, true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                PrintWriter pw = new PrintWriter(bw);
-                pw.write(indent(pdf.toString()));
-                pw.flush();
-                pw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Path tmpPath = Files.createTempFile(Paths.get("/tmp"), "prefix", ".suffix");
+//                file = tmpPath.toFile();
+//
+//                // ファイルに書き込み
+//                FileWriter fw = new FileWriter(file, true);
+//                BufferedWriter bw = new BufferedWriter(fw);
+//                PrintWriter pw = new PrintWriter(bw);
+//                pw.write(indent(pdf.toString()));
+//                pw.flush();
+//                pw.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 //            System.out.println(indent(pdf.toString()));
 
             getPdfViewFrame(pdf).setVisible(true);
